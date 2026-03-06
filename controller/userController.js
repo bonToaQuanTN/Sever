@@ -14,9 +14,16 @@ export const getAll=async (req,res)=>{
     }
 }
 
-export const postApi = async (req,res)=>{
+export const postEmp = async (req,res)=>{
     const {name,email,designation,empid} = req.body;
-
+    //dinh dang email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //kiem tra email
+    if(!emailRegex.test(email)){
+        return res.status(400).json({
+            message:"Email format invalid (example: abc@mail.com)"
+        });
+    }
     try{
         const emp = await UserModel.findOne({where:{empid}});
 
@@ -39,7 +46,7 @@ export const postApi = async (req,res)=>{
     }
 }
 
-export const putApi = async (req, res) => {
+export const putEmp = async (req, res) => {
     //anh xa toi truong id
     const empid = req.params.empid;
 
@@ -59,3 +66,46 @@ export const putApi = async (req, res) => {
         });
     }
 };
+
+export const deleteEmp = async (req, res) => {
+    //anh xa toi truong id
+    const empid = req.params.empid;
+
+    try {
+        const emp = await UserModel.findOne({where: { empid: empid } });
+        if (!emp) {
+            return res.status(404).json({ message: "Employee not found"
+            });
+        }
+
+        await emp.destroy();
+        return res.status(200).json({ message: "Deleted successfully"
+        });
+
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+
+    }
+};
+
+export const getId =async(req, res)=> {
+    const empid = req.params.empid;
+    try{
+        const emp = await UserModel.findOne({
+            where:{empid: empid}
+        });
+        if(!emp){
+            return res.status(404).json({message:("employee not found")});
+        }
+        return res.status(200).json(emp);
+    }catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+
+    }
+}
