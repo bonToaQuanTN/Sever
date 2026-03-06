@@ -1,13 +1,21 @@
 import { body } from "express-validator";
 
 export const employeeValidation = [
-    body("name")
+
+  body("name")
     .notEmpty()
-    .withMessage("Name required"),
-    body("email")
+    .withMessage("Name is required"),
+
+  body("email")
     .isEmail()
-    .withMessage("Invalid email format"),
-    body("empid")
+    .withMessage("Email must be valid (example: abc@mail.com)"),
+
+  body("designation")
     .notEmpty()
-    .withMessage("id requied")
-]
+    .withMessage("Designation is required"),
+
+  body("empid")
+    .notEmpty()
+    .withMessage("Employee ID is required")
+
+];
