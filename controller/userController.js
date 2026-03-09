@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 
 export const getAll = async (req, res) => {
   try {
-    const users = await UserModel.findAll();
+    const users = await UserModel.findAll({attributes:{exclude:["password"]}});
 
     if (users.length === 0) {
       return res.status(404).json({message: "No employees found"});
@@ -19,7 +19,7 @@ export const getAll = async (req, res) => {
 export const getId = async (req, res) => {
   const empid = req.params.empid;
   try {
-    const emp = await UserModel.findOne({where: { empid }});
+    const emp = await UserModel.findOne({where: { empid }, attributes: {exclude:["password"]}});
 
     if (!emp) {
       return res.status(404).json({message: "Employee not found"});
