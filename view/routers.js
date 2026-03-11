@@ -1,6 +1,6 @@
 import express from "express";
 import { getAll, postEmp, getId, putEmp, deleteEmp, login} from "../controller/userController.js";
-import { employeeValidation } from "../validators/employeeValidator.js";
+import { employeeValidation } from "../controller/employeeValidator.js";
 import { auth } from "../Middleware/authMiddleware.js"
 import {adminOnly} from "../Middleware/roleMiddleware.js"
 

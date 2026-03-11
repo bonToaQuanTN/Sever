@@ -1,9 +1,9 @@
 import { validationResult } from "express-validator";
-import { UserModel } from "../postgres/postgres.js";
+import { UserModel } from "./postgres.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-export const getAll = async (req, res) => {
+export const getAll = async (req, res, next) => {
   try {
     const users = await UserModel.findAll({attributes:{exclude:["password"]}});
 
@@ -12,12 +12,11 @@ export const getAll = async (req, res) => {
     }
     return res.status(200).json(users);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({message: "Internal server error"});
+    next(error);
   }
 };
 
-export const getId = async (req, res) => {
+export const getId = async (req, res, next) => {
   const empid = req.params.empid;
   try {
     const emp = await UserModel.findOne({where: { empid }, attributes: {exclude:["password"]}});
@@ -33,7 +32,7 @@ export const getId = async (req, res) => {
 };
 
 //Register user
-export const postEmp = async (req, res) => {
+export const postEmp = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -54,34 +53,36 @@ export const postEmp = async (req, res) => {
     const employee = await UserModel.create({name, email, password: hashedPassword, designation, empid, role});
     res.status(201).json(employee);
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({message: "Internal server error"});
+  } catch (error)  {
+    next(error);
   }
 };
 
-export const login= async(req,res)=>{
+export const login= async(req,res, next)=>{
   const {email,password}=req.body;
   const user = await UserModel.findOne({where:{email}});
+  try{
+    if(!user){
+      return res.status(404).json({message:"Not found"});
+    }
 
-  if(!user){
-    return res.status(404).json({message:"Not found"});
+    const match = await bcrypt.compare(password,user.password);
+    if(!match){
+      return res.status(401).json({message:"Wrong password"});
+    }
+
+    const token = jwt.sign(
+      { id:user.id, role:user.role },
+      process.env.JWT_SECRET,
+      { expiresIn:"1h" }
+    );
+    return res.json({message: "Login success",token: token});
+  }catch (error) {
+    next(error);
   }
-
-  const match = await bcrypt.compare(password,user.password);
-  if(!match){
-    return res.status(401).json({message:"Wrong password"});
-  }
-
-  const token = jwt.sign(
-    { id:user.id, role:user.role },
-    process.env.JWT_SECRET,
-    { expiresIn:"1h" }
-  );
-  return res.json({message: "Login success",token: token});
 };
 
-export const putEmp = async (req, res) => {
+export const putEmp = async (req, res, next) => {
 
   const { name, email, password, designation } = req.body;
 
@@ -100,13 +101,12 @@ export const putEmp = async (req, res) => {
     await user.update(updateData);
     res.json({message: "User updated successfully"});
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({message: "Internal server error"});
+  } catch(error) {
+    next(error);
   }
 };
 
-export const deleteEmp = async (req, res) => {
+export const deleteEmp = async (req, res, next) => {
   const empid = req.params.empid;
   try {
     const emp = await UserModel.findOne({where: { empid }});
@@ -118,7 +118,7 @@ export const deleteEmp = async (req, res) => {
 
     res.json({message: "Deleted successfully"});
 
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error"});
+  } catch (error)  {
+    next(error);
   }
 };
