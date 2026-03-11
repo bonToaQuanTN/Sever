@@ -10,10 +10,7 @@ export const createUserModel=async (Sequelize)=>{
             type: DataTypes.STRING,
             allowNull:false,
             lowercase:true,
-            unique:true,
-            validate:{
-                isEmail:true
-            }
+            unique:true
         },
         password:{
             type: DataTypes.STRING,
