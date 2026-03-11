@@ -32,7 +32,6 @@ export const getId = async (req, res) => {
 };
 
 export const postEmp = async (req, res) => {
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({

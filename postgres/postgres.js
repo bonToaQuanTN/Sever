@@ -17,12 +17,12 @@ const connection = async () => {
 
     // create model
     UserModel = await createUserModel(sequelize);
+    sequelize.sync({alter:true})
 
     // sync database
     await sequelize.sync();
     console.log("Database synced");
-
-  } catch (error) {
+  }catch (error){
     console.error("Database connection failed:", error);
   }
 };
