@@ -29,6 +29,8 @@ export const createUserModel=async (Sequelize)=>{
             type: DataTypes.ENUM("admin","user"),
             defaultValue:"user"
         }
+    },{
+        version: true
     });
     return User;
 }

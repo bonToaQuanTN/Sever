@@ -5,17 +5,34 @@ import jwt from "jsonwebtoken";
 
 export const getAll = async (req, res, next) => {
   try {
-    const users = await UserModel.findAll({attributes:{exclude:["password"]}});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
-    if (users.length === 0) {
+    const { count, rows } = await UserModel.findAndCountAll({
+      attributes: { exclude: ["password"] },
+      limit: limit,
+      offset: offset,
+      order:[["id","ASC"]]
+    });
+
+    if (rows.length === 0) {
       return res.status(404).json({message: "No employees found"});
     }
-    return res.status(200).json(users);
+
+    return res.status(200).json({
+      totalUsers: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      users: rows
+    });
+
   } catch (error) {
     next(error);
   }
 };
 
+//src user
 export const getId = async (req, res, next) => {
   const empid = req.params.empid;
   try {
