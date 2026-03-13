@@ -82,17 +82,21 @@ export const login= async(req,res, next)=>{
     if(!user){
       return res.status(404).json({message:"Not found"});
     }
-
+    
     const match = await bcrypt.compare(password,user.password);
     if(!match){
       return res.status(401).json({message:"Wrong password"});
     }
 
+    //tao token login
     const token = jwt.sign(
-      { id:user.id, role:user.role },
-      process.env.JWT_SECRET,
+      {id:user.id,
+        empid: user.empid,
+        role:user.role },
+        process.env.JWT_SECRET,
       { expiresIn:"1h" }
     );
+    
     return res.json({message: "Login success",token: token});
   }catch (error) {
     next(error);
@@ -105,12 +109,22 @@ export const putEmp = async (req, res, next) => {
 
   try {
     const user = await UserModel.findOne({where: { empid: req.params.empid }});
+    const currentUser = req.user;
+    const targetEmpId = req.params.empid;
+
     if (!user) {
       return res.status(404).json({message: "User not found"});
     }
+
+    //kiem tra nguoi update thong tin
+    if (currentUser.role !== "admin" && currentUser.empid !== String(targetEmpId)) {
+      return res.status(403).json({
+        message: "You can only update your own profile"
+      });
+    }
     let updateData = {name, email, designation};
 
-    // nếu có password mới thì hash
+    // hash lai pass sau update
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password = hashedPassword;

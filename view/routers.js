@@ -1,12 +1,12 @@
-import express from "express";
-import { getAll, postEmp, getId, putEmp, deleteEmp, login} from "../controller/userController.js";
-import { employeeValidation } from "../controller/employeeValidator.js";
-import { auth } from "../Middleware/authMiddleware.js"
-import {adminOnly} from "../Middleware/roleMiddleware.js"
+    import express from "express";
+    import { getAll, postEmp, getId, putEmp, deleteEmp, login} from "../controller/userController.js";
+    import { employeeValidation } from "../controller/employeeValidator.js";
+    import { auth } from "../Middleware/authMiddleware.js"
+    import {adminOnly} from "../Middleware/roleMiddleware.js"
 
-const router = express.Router();
+    const router = express.Router();
 
-router.post("/login",login);
+    router.post("/login",login);
 
 router.get("/employees",auth, getAll);
 
@@ -14,7 +14,7 @@ router.get("/employees/:empid", auth, getId);
 
 router.post( "/employees", employeeValidation, auth, adminOnly, postEmp);
 
-router.put( "/employees/:empid",  employeeValidation, auth, adminOnly, putEmp);
+router.put( "/employees/:empid",  employeeValidation, auth, putEmp);
 
 router.delete( "/employees/:empid", auth, adminOnly, deleteEmp);
 
